@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SPEEDUINO DASHBOARD</title>
+        <!--<meta name="viewport" content="width=device-width, initial-scale=1">-->
+        <meta name="viewport" content="width=1400, initial-scale=1">
+        
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script> <!-- Attempt to load from CDN -->
+        <script>window.Chart || document.write('<script src="js/libs/chart.umd.min.js">\x3C/script>')</script> <!-- Fallback to local files if not possible -->
+
+        <script src="//cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.7/all/gauge.min.js"></script> <!-- Attempt to load from CDN -->
+        <script>window.RadialGauge || document.write('<script src="js/libs/gauge.min.js">\x3C/script>')</script> <!-- Fallback to local files if not possible -->
+
+        <script src="https://cdn.jsdelivr.net/npm/luxon@1.27.0"></script>
+        <script>luxon.DateTime || document.write('<script src="js/libs/luxon.min.js">\x3C/script>')</script> <!-- Fallback to local files if not possible -->
+
+        <!-- <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.0.0"></script> -->
+        <script src="js/libs/chartjs-adaptor-luxon.min.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0"></script>
+        <script>window.ChartStreaming || document.write('<script src="js/libs/chartjs-plugin-streaming.min.js">\x3C/script>')</script> <!-- Fallback to local files if not possible -->
+
+    </head>
+    <body onLoad="updateGauges()">
+        <!-- <canvas id="gauge1" class="gauge" style="background-size: 100%; background-image: url('https://colby.id.au/assets/files/background-894d31f864780b66a107b61871b56b90.svg')"></canvas>-->
+        <div class="gauge-cluster"> 
+            <div id="all-gauges" class="gauge-container">
+                <canvas id="gauge1" class="gauge gauge-primary"></canvas>
+
+                <div class="gauge-container-small">
+                <div class="gauge-row-left"> <canvas id="gauge2" class="gauge gauge-reverse gauge-linear"></canvas> <div class="gauge-text"><span id="gauge2-value" class="gauge-value">0</span> <span id="gauge2-label" class="gauge-label">TPS</span></div> </div> 
+                <div class="gauge-row-left"> <canvas id="gauge3" class="gauge gauge-reverse gauge-linear"></canvas> <div class="gauge-text"><span id="gauge3-value" class="gauge-value">0</span> <span id="gauge3-label" class="gauge-label">CLT</span></div> </div> 
+                <div class="gauge-row-left"> <canvas id="gauge4" class="gauge gauge-reverse gauge-linear"></canvas> <div class="gauge-text"><span id="gauge4-value" class="gauge-value">0</span> <span id="gauge4-label" class="gauge-label">IAT</span></div> </div> 
+
+                <div class="gauge-row-right"> <canvas id="gauge5" class="gauge gauge-linear"></canvas> <div class="gauge-text-right"><span id="gauge5-value" class="gauge-value gauge-value-right">0</span> <span id="gauge5-label" class="gauge-label">PW</span></div> </div> 
+                <div class="gauge-row-right"> <canvas id="gauge6" class="gauge gauge-linear"></canvas> <div class="gauge-text-right"><span id="gauge6-value" class="gauge-value gauge-value-right">0</span> <span id="gauge6-label" class="gauge-label">MAP</span></div> </div> 
+                <div class="gauge-row-right"> <canvas id="gauge7" class="gauge gauge-linear"></canvas> <div class="gauge-text-right"><span id="gauge7-value" class="gauge-value gauge-value-right">0</span> <span id="gauge7-label" class="gauge-label">AFR</span></div> </div>
+                </div>
+                <!--
+                <canvas id="gauge5" class="gauge"></canvas>
+                <canvas id="gauge6"></canvas>
+                <canvas id="gauge7"></canvas>
+                <canvas id="gauge8"></canvas>
+                <canvas id="gauge9"></canvas>
+                <canvas id="gauge10"></canvas>
+                <canvas id="gauge11"></canvas>
+                <canvas id="gauge12"></canvas>
+                <canvas id="gauge13"></canvas>
+                <canvas id="gauge14"></canvas>
+                <canvas id="gauge15"></canvas>
+                <canvas id="gauge16"></canvas>
+                -->
+            </div>
+        </div>
+        <!--<div class="networkSpeed"><canvas id="liveChart" width="240" height="120"></canvas><span id="readSpeed" ></span></div>-->
+
+        <script src="js/live-line.js"></script>
+        <script src="js/gauges.js"></script>
+        <script src="js/sse.js"></script>
+        <script>if (window.module) module = window.module;</script>
+    </body>
+</html>
