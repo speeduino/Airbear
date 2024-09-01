@@ -6,6 +6,7 @@
 #include "serialParser.h"
 #include "timer.h"
 #include "ble-uart.h"
+#include "tcp-uart.h"
 #include "config.h"
 #include "web_config.h"
 #include "wifi_mgt.h"
@@ -26,12 +27,17 @@ void setup()
   initConfig();
   initTimers();
   initBLE();
+  initWiFi();
 
   delay(1000);
+  Serial.println("Connection Type: " + String(config.getUChar("connection_type")));
 
-  if(config.getUChar("connection_type") == CONNECTION_TYPE_WIFI)
+  if( (config.getUChar("connection_type") == CONNECTION_TYPE_TUNERSTUDIO) )
   {
-    initWiFi();
+    initTCP();
+  }
+  if( (config.getUChar("connection_type") == CONNECTION_TYPE_WIFI) )
+  {
     //Init file system
     if (!SPIFFS.begin(true)) {
       Serial.println("An error has occurred while mounting SPIFFS");
@@ -49,19 +55,23 @@ void setup()
       request->send(200, "text/json", JSON.stringify(readings_JSON));
     });
 
-    server.on(WEB_CONFIG_URL, HTTP_GET, [](AsyncWebServerRequest *request) {
+    server.serveStatic("/", SPIFFS, "/");
+
+  }
+
+  server.on(WEB_CONFIG_URL, HTTP_GET, [](AsyncWebServerRequest *request) {
       request->send(200, "text/html", webConfigRequest(request));
     });
 
-    server.on(WEB_CONFIG_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
+  server.on(WEB_CONFIG_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
       request->send(200, "text/html", webConfigPOSTRequest(request));
     });
 
-    //Handlers for updating the data partition
-    server.on(UPDATE_DATA_REMOTE_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
+  //Handlers for updating the data partition
+  server.on(UPDATE_DATA_REMOTE_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
       request->send(200, "text/html", dataPartitionDownload(request, U_SPIFFS));
     });
-    server.on(UPDATE_DATA_UPLOAD_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
+  server.on(UPDATE_DATA_UPLOAD_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
       //This runs when the uplaod is completed
       partitionUploadComplete(request);
     },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
@@ -69,39 +79,30 @@ void setup()
       partitionUploadChunk(request, filename, index, data, len, final, U_SPIFFS);
     }
     );
-
-    //Handlers for updating the firmware
-    server.on(UPDATE_FW_REMOTE_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
-      request->send(200, "text/html", dataPartitionDownload(request, U_SPIFFS));
+  //Handlers for updating the firmware
+  server.on(UPDATE_FW_REMOTE_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
+    request->send(200, "text/html", dataPartitionDownload(request, U_SPIFFS));
     });
-    server.on(UPDATE_FW_UPLOAD_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
-      //This runs when the uplaod is completed
-      partitionUploadComplete(request);
+  server.on(UPDATE_FW_UPLOAD_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
+    //This runs when the uplaod is completed
+    partitionUploadComplete(request);
     },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
-      //This runs each time a new chunk is received
-      partitionUploadChunk(request, filename, index, data, len, final, U_FLASH);
+    //This runs each time a new chunk is received
+    partitionUploadChunk(request, filename, index, data, len, final, U_FLASH);
     }
     );
-    
-    server.serveStatic("/", SPIFFS, "/");
+  
+  
 
-    // Start server
-    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
-    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST, PUT");
-    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "content-type");
-    DefaultHeaders::Instance().addHeader("Cache-Control", "no-cache");
-    DefaultHeaders::Instance().addHeader("X-Accel-Buffering", "no");
+  // Start server
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST, PUT");
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "content-type");
+  DefaultHeaders::Instance().addHeader("Cache-Control", "no-cache");
+  DefaultHeaders::Instance().addHeader("X-Accel-Buffering", "no");
 
-    server.begin();
-  }
-  else
-  {
-    while(1)
-    {
-      Serial.println("No wifi config");
-      delay(1000);
-    }
-  }
+  server.begin();
+  
 
   //By default the ESP32-C3 will output a bunch of diag messages on bootup over UART. 
   //This messes up the secondary serial on the Speeduino so these bootup messages are disabled.
@@ -154,7 +155,6 @@ void loop()
       Serial.println(tempMsg.c_str());
       SendMessageBLE(tempMsg);
     }
-
   }
 
   if(BIT_CHECK(LOOP_TIMER, BIT_TIMER_1HZ)) //1 hertz
@@ -180,6 +180,14 @@ void loop()
           serialECURequestQueueSize = 0;
           */
 
+        }
+      }
+      else if(config.getUChar("connection_type") == CONNECTION_TYPE_TUNERSTUDIO)
+      {
+        if(numTCPClients > 0)
+        {
+          Serial.print("TunerStudio Requests received: ");
+          Serial.println(TCPrequestsReceived);
         }
       }
     }

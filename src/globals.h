@@ -22,9 +22,10 @@
 #define BIT_TIMER_200HZ           6U
 #define BIT_TIMER_1KHZ            7U
 
-#define CONNECTION_TYPE_NONE      0
-#define CONNECTION_TYPE_WIFI      1
-#define CONNECTION_TYPE_BLE       2
+#define CONNECTION_TYPE_NONE        0
+#define CONNECTION_TYPE_WIFI        1
+#define CONNECTION_TYPE_BLE         2
+#define CONNECTION_TYPE_TUNERSTUDIO 3
 
 #define BLE_ID                    "Speeduino"
 

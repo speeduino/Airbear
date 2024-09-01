@@ -25,8 +25,9 @@ String webConfigRequest(AsyncWebServerRequest *request)
   response += "<form action=\"" + String(WEB_CONFIG_URL) + "\" method=\"post\">";
   response += "<h2>Connection Type</h2>";
   response += "<select name=\"connection_type\" />";
-  response += "<option value=\"1\">Wifi</option>";
+  response += "<option value=\"1\">Web Dash</option>";
   response += "<option value=\"2\">Bluetooth</option>";
+  response += "<option value=\"3\">TunerStudio (TCP)</option>";
   response += "</select><br/>";
   response += "<input type=\"submit\" value=\"Save\"/>";
   response += "</form>";
@@ -105,7 +106,8 @@ String webConfigPOSTRequest(AsyncWebServerRequest *request)
   if (request->hasParam("connection_type", true))
   {
     Serial.println("Changing Connection Type: " + request->getParam("connection_type", true)->value());
-    //config.putUChar("connection_type", atoi(request->getParam("connection_type", true)->value()[0]) );
+    char c = request->getParam("connection_type", true)->value()[0];
+    config.putUChar("connection_type", atoi(&c) );
   }
 
   if(wifiChanged)
