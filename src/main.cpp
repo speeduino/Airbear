@@ -58,6 +58,13 @@ void setup()
     server.serveStatic("/", SPIFFS, "/");
 
   }
+  else
+  {
+    //If not using the web dash then the root URL will produce the config page
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+      request->send(200, "text/html", webConfigRequest(request));
+    });
+  }
 
   server.on(WEB_CONFIG_URL, HTTP_GET, [](AsyncWebServerRequest *request) {
       request->send(200, "text/html", webConfigRequest(request));

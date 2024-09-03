@@ -9,6 +9,12 @@ This file contains routines for remotely updating the LittleFS partition that co
 #include <HTTPClient.h>
 #include <Update.h>
 
+#include "../lib/esp_ghota/include/semver.h"
+#include "../lib/esp_ghota/include/esp_ghota.h"
+
+char org_name[] = "speeduino";
+char repo_name[] = "AirBear";
+
 //Load a data partition from a remote URL
 String dataPartitionDownload(AsyncWebServerRequest *request, uint8_t partitionType)
 {
@@ -114,4 +120,22 @@ void firmwarePartitionDownload(AsyncWebServerRequest *request)
       case HTTP_UPDATE_OK: Serial.println("HTTP_UPDATE_OK"); break;
     }
   }
+}
+
+void updateFromRelease()
+{
+  ghota_config_t ghconfig = {
+    {.filenamematch = "AirBear-esp32-c3.bin"}, // Glob Pattern to match against the Firmware file
+    {.storagenamematch = "AirBear-Dash-Data.bin"}, // Glob Pattern to match against the storage firmware file
+    {.storagepartitionname = "spiffs"}, // Update the storage partition
+    };
+    ghconfig.orgname = org_name;
+    ghconfig.reponame = repo_name;
+
+    static const char* TAG = "main";
+    ghota_client_handle_t *ghota_client = ghota_init(&ghconfig);
+    if (ghota_client == NULL) {
+        ESP_LOGE(TAG, "ghota_client_init failed");
+        return;
+    }
 }

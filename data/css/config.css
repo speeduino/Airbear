@@ -72,7 +72,6 @@ body {
   input:checked + label {
     background: #ffffff;
     color: #fd7034;
-    border-bottom: 1px solid;
   }
   
   #tab-1:checked ~ .content #content-1,
