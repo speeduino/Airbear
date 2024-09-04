@@ -2,7 +2,6 @@
 #include "globals.h"
 #include "sse.h"
 #include "serialParser.h"
-//#include "timer.h"
 #include "tcp-uart.h"
 #include "config.h"
 #include "web_config.h"
@@ -19,7 +18,8 @@
   #include "ble-uart.h"
   #include <soc/efuse_reg.h>
   #include <esp_efuse.h>
-  #include "updater.h"
+  #include "frontend_updater.h"
+  #include "timer.h"
 #endif
 
 

@@ -30,7 +30,7 @@ void initWiFi()
   }
   else
   {
-    WiFi.begin(ssid, password);
+    WiFi.begin(ssid.c_str(), password.c_str());
     Serial.print("Connecting to WiFi ..");
 
     uint8_t timeoutCounter = 0;
@@ -83,7 +83,7 @@ void startAPMode()
   String ssid = config.getString("ap-ssid", ""); 
   String password = config.getString("ap-psk", "");
 
-  if(ssid != "") { WiFi.softAP(ssid, password); }
+  if(ssid != "") { WiFi.softAP(ssid.c_str(), password.c_str()); }
   else 
   { 
     //If no config details have been saved for the AP mode, use a default name and no password

@@ -1,6 +1,6 @@
 
-#ifndef UPDATER_H
-#define UPDATER_H
+#ifndef FRONTEND_UPDATER_H
+#define FRONTEND_UPDATER_H
 
 #define UPDATE_DATA_REMOTE_URL  "/updateDataRemote"
 #define UPDATE_DATA_UPLOAD_URL  "/updateDataUpload"
