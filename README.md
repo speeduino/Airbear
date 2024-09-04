@@ -17,6 +17,7 @@ It is currently in VERY early stages of development and is not yet ready for use
 
 ## Documentation
 In progress
+(Mega with esp8266 onboard)[https://www.fambach.net/mega-wifi/#Board_Funktionen]
 
 ## Hardware
 Any ESP32-C3 board will work, however the intended target board is the low cost ESP32-C3 Supermini 
