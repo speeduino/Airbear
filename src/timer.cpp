@@ -1,10 +1,18 @@
-#include "ESP32TimerInterrupt.h"
 #include "globals.h"
 #include "timer.h"
 
+#ifdef ESP8266
+  #include "ESP8266TimerInterrupt.h"
+  ESP8266Timer ITimer0();
+#endif
+
+#ifdef ESP32
+  #include "ESP32TimerInterrupt.h"
+  ESP32Timer ITimer0(0); 
+  ESP32_ISR_Timer ISR_Timer;
+#endif
+
 #define TIMER0_INTERVAL_MS 1000
-ESP32Timer ITimer0(0);
-ESP32_ISR_Timer ISR_Timer;
 
 volatile byte loop5ms;
 volatile byte loop33ms;

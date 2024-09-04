@@ -1,5 +1,12 @@
 #include "tcp-uart.h"
-#include <AsyncTCP.h>
+
+#ifdef ESP8266
+  #include <ESPAsyncTCP.h>
+#endif
+
+#ifdef ESP32
+  #include <AsyncTCP.h>
+#endif
 
 AsyncServer *TS_TCP_Server;
 uint32_t TCPrequestsReceived = 0;

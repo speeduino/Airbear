@@ -1,6 +1,15 @@
 #include "web_config.h"
-#include "updater.h"
 #include "config.h"
+
+#ifdef ESP8266
+  #define UPDATE_DATA_UPLOAD_URL ""
+  #define UPDATE_FW_UPLOAD_URL ""
+#endif
+
+#ifdef ESP32
+  #include "updater.h"
+#endif
+
 
 String webConfigRequest(AsyncWebServerRequest *request)
 {
@@ -51,7 +60,7 @@ String webConfigRequest(AsyncWebServerRequest *request)
   response += "<h2>Join Wifi network</h2>";
   response += "<select name=\"ssid\" />";
 
-  int n = WiFi.scanNetworks(false, false, false, 100);
+  int n = WiFi.scanNetworks();
   for (int i = 0; i < n; ++i)
   {
     String selected = "";

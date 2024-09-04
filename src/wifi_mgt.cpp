@@ -1,8 +1,16 @@
 #include "wifi_mgt.h"
 #include "globals.h"
 #include "config.h"
-#include <WiFi.h>
-#include <ESPmDNS.h>
+
+#ifdef ESP8266
+  #include <ESP8266WiFi.h>
+  #include <ESP8266mDNS.h>
+#endif
+
+#ifdef ESP32
+  #include <WiFi.h>
+  #include <ESPmDNS.h>
+#endif
 
 #include "lwip/api.h"
 #include "lwip/tcp.h"
@@ -40,14 +48,27 @@ void initWiFi()
       }
     }
   }
+  #ifdef ESP8266
+    if (!MDNS.begin("speeduino")) {
+    Serial.println("Error setting up MDNS responder!");
+    return;
+    } else {
+      Serial.println("mDNS responder started");
 
-  // Set an mDNS name
-  if (!MDNS.begin("speeduino")) { Serial.println("Error setting up MDNS responder!"); }
-  else
-  {
-    mdns_service_add(NULL, "_http", "_tcp", 80, NULL, 0);
-    mdns_service_instance_name_set("_http", "_tcp", "Speeduino Web Dash");
-  }
+      // Add an HTTP service to mDNS
+      MDNS.addService("http", "tcp", 80);
+      MDNS.addServiceTxt("http", "tcp", "instance", "Speeduino Web Dash"); // Add service text (optional)
+    }
+  #endif
+  #ifdef ESP32
+    // Set an mDNS name
+    if (!MDNS.begin("speeduino")) { Serial.println("Error setting up MDNS responder!"); }
+    else
+    {
+      mdns_service_add(NULL, "_http", "_tcp", 80, NULL, 0);
+      mdns_service_instance_name_set("_http", "_tcp", "Speeduino Web Dash");
+    }
+  #endif
 
   Serial.println(WiFi.localIP());
 
