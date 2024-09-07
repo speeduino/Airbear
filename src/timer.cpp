@@ -1,10 +1,8 @@
-#include "ESP32TimerInterrupt.h"
 #include "globals.h"
 #include "timer.h"
 
 #define TIMER0_INTERVAL_MS 1000
-ESP32Timer ITimer0(0);
-ESP32_ISR_Timer ISR_Timer;
+hw_timer_t *timer = NULL;
 
 volatile byte loop5ms;
 volatile byte loop33ms;
@@ -22,18 +20,21 @@ void initTimers()
   loop250ms = 0;
   loopSec = 0;
 
-  ITimer0.attachInterruptInterval(TIMER0_INTERVAL_MS, oneMSInterval);
+  // Set timer frequency to 1Mhz
+  timer = timerBegin(0, 80, true);
+  timerAttachInterrupt(timer, &oneMSInterval, true);
+  timerAlarmWrite(timer, 1000, true);
+  timerAlarmEnable(timer);
 
 }
 
 void stopTimers()
 {
-  ITimer0.detachInterrupt();
+  timerDetachInterrupt(timer);
 }
 
-bool IRAM_ATTR oneMSInterval(void *timerNo)
+void ARDUINO_ISR_ATTR oneMSInterval()
 {
-  ISR_Timer.run();
   BIT_SET(TIMER_mask, BIT_TIMER_1KHZ);
 
   //Increment Loop Counters
@@ -85,6 +86,4 @@ bool IRAM_ATTR oneMSInterval(void *timerNo)
     loopSec = 0; //Reset counter
     BIT_SET(TIMER_mask, BIT_TIMER_1HZ);
   }
-
-  return true;
 }

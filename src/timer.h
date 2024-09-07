@@ -3,6 +3,6 @@
 
 void initTimers();
 void stopTimers();
-bool IRAM_ATTR oneMSInterval(void *timerNo);
+void ARDUINO_ISR_ATTR oneMSInterval(void);
 
 #endif

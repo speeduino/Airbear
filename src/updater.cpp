@@ -4,41 +4,18 @@ This file contains routines for remotely updating the LittleFS partition that co
 #include "updater.h"
 #include "esp_partition.h"
 #include "timer.h"
+#include "config.h"
+#include "timer.h"
 
-#include <HTTPUpdate.h>
+#include <Arduino.h>
+
+#include <WiFi.h>
+#include <WiFiMulti.h>
+
 #include <HTTPClient.h>
+#include <HTTPUpdate.h>
+
 #include <Update.h>
-
-#include "../lib/esp_ghota/include/semver.h"
-#include "../lib/esp_ghota/include/esp_ghota.h"
-
-char org_name[] = "speeduino";
-char repo_name[] = "AirBear";
-
-//Load a data partition from a remote URL
-String dataPartitionDownload(AsyncWebServerRequest *request, uint8_t partitionType)
-{
-  String resultPage = "";
-  if (request->hasParam("update_url", true)) 
-  {
-    HTTPClient client;
-    t_httpUpdate_return ret = httpUpdate.updateSpiffs(client, request->getParam("update_url", true)->value());
-    switch (ret) 
-    {
-      case HTTP_UPDATE_FAILED: Serial.printf("HTTP_UPDATE_FAILED Error (%d): %s", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str()); break;
-
-      case HTTP_UPDATE_NO_UPDATES: Serial.println("HTTP_UPDATE_NO_UPDATES"); break;
-
-      case HTTP_UPDATE_OK: Serial.println("HTTP_UPDATE_OK"); break;
-    }
-    if (ret == HTTP_UPDATE_OK) 
-    {
-      
-    }
-  }
-  return resultPage;
-
-}
 
 //Load a data partition from an uploaded file
 void partitionUploadChunk(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final, uint8_t partitionType)
@@ -103,39 +80,74 @@ void partitionUploadComplete(AsyncWebServerRequest *request)
   ESP.restart();
 }
 
-void firmwarePartitionDownload(AsyncWebServerRequest *request)
+String saveRemoteFW_URLs(AsyncWebServerRequest *request)
 {
-  if (request->hasParam("update_url", true)) 
+  String resultPage = "Update page";
+  if (request->hasParam("newFW_url", true)) 
   {
-    HTTPClient client; 
-    Serial.println("Update sketch...");
-    t_httpUpdate_return ret = httpUpdate.update(client, request->getParam("update_url", true)->value());
+    config.putString("newFW_url", request->getParam("newFW_url", true)->value());
+  }
+  if (request->hasParam("newData_url", true)) 
+  {
+    HTTPClient client;
+    config.putString("newData_url", request->getParam("newData_url", true)->value());
+  }
+  return resultPage;
+}
 
+void update_progress(int cur, int total) {
+  Serial.printf("CALLBACK:  HTTP update process at %d of %d bytes...\n", cur, total);
+}
+
+void updateFromRemote()
+{
+  String newFW_url = config.getString("newFW_url", ""); 
+  String newData_url = config.getString("newData_url", "");
+
+  if(newFW_url != "")
+  {
+    WiFiClient client;
+    
+    Serial.print("Attempting to update FW from: ");
+    Serial.println(newFW_url);  //Blank the config values so that it doesn't get stuck in a fail loop
+
+    httpUpdate.onProgress(update_progress);
+    config.putString("newFW_url", ""); 
+    t_httpUpdate_return ret = httpUpdate.update(client, newFW_url);
+    
     switch (ret) 
     {
-      case HTTP_UPDATE_FAILED: Serial.printf("HTTP_UPDATE_FAILED Error (%d): %s", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str()); break;
+      case HTTP_UPDATE_FAILED: Serial.printf("HTTP_UPDATE_FAILED Error (%d): %s \n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str()); break;
 
       case HTTP_UPDATE_NO_UPDATES: Serial.println("HTTP_UPDATE_NO_UPDATES"); break;
 
-      case HTTP_UPDATE_OK: Serial.println("HTTP_UPDATE_OK"); break;
+      case HTTP_UPDATE_OK:
+        config.putString("newFW_url", ""); 
+        Serial.println("HTTP_UPDATE_OK"); 
+        break;
     }
   }
-}
+  if(newData_url != "")
+  {
+    WiFiClient client;
+    
+    Serial.print("Attempting to update Data from: ");
+    Serial.println(newData_url);
 
-void updateFromRelease()
-{
-  ghota_config_t ghconfig = {
-    {.filenamematch = "AirBear-esp32-c3.bin"}, // Glob Pattern to match against the Firmware file
-    {.storagenamematch = "AirBear-Dash-Data.bin"}, // Glob Pattern to match against the storage firmware file
-    {.storagepartitionname = "spiffs"}, // Update the storage partition
-    };
-    ghconfig.orgname = org_name;
-    ghconfig.reponame = repo_name;
+    httpUpdate.onProgress(update_progress);
+    t_httpUpdate_return ret = httpUpdate.update(client, newData_url);
+    config.putString("newData_url", "");
 
-    static const char* TAG = "main";
-    ghota_client_handle_t *ghota_client = ghota_init(&ghconfig);
-    if (ghota_client == NULL) {
-        ESP_LOGE(TAG, "ghota_client_init failed");
-        return;
+    switch (ret) 
+    {
+      case HTTP_UPDATE_FAILED: Serial.printf("HTTP_UPDATE_FAILED Error (%d): %s \n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str()); break;
+
+      case HTTP_UPDATE_NO_UPDATES: Serial.println("HTTP_UPDATE_NO_UPDATES"); break;
+
+      case HTTP_UPDATE_OK: 
+        Serial.println("HTTP_UPDATE_OK"); 
+        config.putString("newData_url", "");
+        break;
     }
+  }
 }

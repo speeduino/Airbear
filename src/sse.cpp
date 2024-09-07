@@ -19,7 +19,10 @@ void notifyClients()
   }
   else
   {
-    events.send(JSON.stringify(readings_JSON).c_str(), "reading", millis(), 0);
+    String jsonOutput;
+    serializeJson(readings_JSON, jsonOutput);
+    //events.send(JSON.stringify(readings_JSON).c_str(), "reading", millis(), 0);
+    events.send(jsonOutput.c_str(), "reading", millis(), 0);
     notificationsSent++;
   }
 }

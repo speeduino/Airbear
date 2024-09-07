@@ -1,3 +1,0 @@
-breathe
-sphinx-git
-myst-parser

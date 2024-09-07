@@ -3,9 +3,11 @@
 
 //#include <Arduino.h>
 #include <ESPAsyncWebServer.h>
-#include <Arduino_JSON.h>
+//#include <Arduino_JSON.h>
+#include <ArduinoJson.h>
 
 #define PRODUCT_NAME             "AirBear"
+#define FIRMWARE_VERSION         "0.0.3"
 
 #define FAKE_RPM
 
@@ -51,7 +53,8 @@ extern AsyncWebServer server;
 extern AsyncEventSource events;
 
 // Json Variable for current data packet
-extern JSONVar readings_JSON;
+//extern JSONVar readings_JSON;
+extern JsonDocument readings_JSON;
 
 extern bool deviceConnected;
 

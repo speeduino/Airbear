@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "serialParser.h"
-#include <Arduino_JSON.h>
+//#include <Arduino_JSON.h>
+#include <ArduinoJson.h>
 
 uint16_t tempRPM = 0;
 uint8_t serialECURequestQueueSize = 0;
@@ -28,7 +29,7 @@ void parseFixedSerialData()
   {
     serialECURequestQueueSize--;
     //Serial.println("Valid Data found");
-    readings_JSON = undefined;
+    //readings_JSON = undefined;
 
     readings_JSON["secl"] = Serial_ECU.read();
 

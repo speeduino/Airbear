@@ -7,7 +7,8 @@ AsyncWebServer server(80);
 AsyncEventSource events("/events");
 
 // Json Variable for current data packet
-JSONVar readings_JSON;
+//JSONVar readings_JSON;
+JsonDocument readings_JSON;
 
 volatile byte TIMER_mask;
 volatile byte LOOP_TIMER;

@@ -7,5 +7,6 @@
 
 String webConfigRequest(AsyncWebServerRequest *request);
 String webConfigPOSTRequest(AsyncWebServerRequest *request);
+String scanWifi(AsyncWebServerRequest *request);
 
 #endif

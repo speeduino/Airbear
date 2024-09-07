@@ -28,6 +28,7 @@ void setup()
   initTimers();
   initBLE();
   initWiFi();
+  updateFromRemote(); //Check for pending remote firmware updates
 
   delay(1000);
   Serial.println("Connection Type: " + String(config.getUChar("connection_type")));
@@ -52,7 +53,10 @@ void setup()
     });
     
     server.on("/data", HTTP_GET, [](AsyncWebServerRequest *request) {
-      request->send(200, "text/json", JSON.stringify(readings_JSON));
+      String jsonOutput;
+      serializeJson(readings_JSON, jsonOutput);
+      //request->send(200, "text/json", JSON.stringify(readings_JSON));
+      request->send(200, "text/json", jsonOutput.c_str());
     });
 
     server.serveStatic("/", SPIFFS, "/");
@@ -74,10 +78,16 @@ void setup()
       request->send(200, "text/html", webConfigPOSTRequest(request));
     });
 
-  //Handlers for updating the data partition
-  server.on(UPDATE_DATA_REMOTE_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
-      request->send(200, "text/html", dataPartitionDownload(request, U_SPIFFS));
+  //Updates the firmware AND data from remote URLs
+  server.on(UPDATE_REMOTE_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
+      request->send(200, "text/html", saveRemoteFW_URLs(request));
+      ESP.restart();
     });
+  //Scan the wifi networks and return them as JSON
+  server.on("/wifi", HTTP_GET, [](AsyncWebServerRequest *request) {
+      request->send(200, "text/json", scanWifi(request));
+    });
+
   server.on(UPDATE_DATA_UPLOAD_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
       //This runs when the uplaod is completed
       partitionUploadComplete(request);
@@ -86,10 +96,6 @@ void setup()
       partitionUploadChunk(request, filename, index, data, len, final, U_SPIFFS);
     }
     );
-  //Handlers for updating the firmware
-  server.on(UPDATE_FW_REMOTE_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
-    request->send(200, "text/html", dataPartitionDownload(request, U_SPIFFS));
-    });
   server.on(UPDATE_FW_UPLOAD_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
     //This runs when the uplaod is completed
     partitionUploadComplete(request);
