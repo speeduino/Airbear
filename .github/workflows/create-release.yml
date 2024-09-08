@@ -53,17 +53,17 @@ jobs:
         curl -v --tlsv1.2 --ipv4 --user "speeduino_firmware@speeduino.com:$WEB_PWD" --basic -T "./.pio/build/esp32-c3-supermini/littlefs.bin" "https://speeduino.com:2078/AirBear/$TAG_NAME/AirBear-Dash-Data-littlefs.bin"
     
     - name: Build Changelog
-        uses: mikepenz/release-changelog-builder-action@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          mode: "COMMIT"
+      uses: mikepenz/release-changelog-builder-action@v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        mode: "COMMIT"
 
     - name: Create Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          body: ${{steps.github_release.outputs.changelog}}
-          files: |
-            ./.pio/build/esp32-c3-supermini/firmware.bin
-            ./.pio/build/esp32-c3-supermini/littlefs.bin
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        body: ${{steps.github_release.outputs.changelog}}
+        files: |
+          ./.pio/build/esp32-c3-supermini/firmware.bin
+          ./.pio/build/esp32-c3-supermini/littlefs.bin
