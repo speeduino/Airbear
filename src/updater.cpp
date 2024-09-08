@@ -135,7 +135,7 @@ void updateFromRemote()
     Serial.println(newData_url);
 
     httpUpdate.onProgress(update_progress);
-    t_httpUpdate_return ret = httpUpdate.update(client, newData_url);
+    t_httpUpdate_return ret = httpUpdate.updateSpiffs(client, newData_url);
     config.putString("newData_url", "");
 
     switch (ret) 
