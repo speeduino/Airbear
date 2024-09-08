@@ -56,3 +56,9 @@ async function scanWifi()
     s.add(opt)
   }
 }
+
+function toggleData()
+{
+  const dataField = eByID("newData_url")
+  dataField.disabled = !dataField.disabled
+}

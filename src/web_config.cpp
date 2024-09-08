@@ -72,6 +72,7 @@ String webConfigRequest(AsyncWebServerRequest *request)
   response += "<form action=\"" + String(UPDATE_REMOTE_URL) + "\" method=\"post\">";
   response += "<input type=\"hidden\" id=\"newFW_url\" name=\"newFW_url\" />";
   response += "<input type=\"hidden\" id=\"newData_url\" name=\"newData_url\"/>";
+  response += "<input type=\"checkbox\" id=\"updateData\" onClick=\"toggleData()\" checked />Update Dashboard Data<br/>";
   response += "<input type=\"submit\" value=\"Update\" id=\"update_btn\" disabled/>";
   response += "</form>";
   response += "<h2>Manual Update</h2>";
