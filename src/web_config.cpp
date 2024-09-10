@@ -2,12 +2,16 @@
 #include "updater.h"
 #include "config.h"
 
+#include "static/static_html.h"
+#include "static/static_js.h"
+
 String webConfigRequest(AsyncWebServerRequest *request)
 {
   String response = "";
-  response += "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Speeduino Web Config</title>";
-  response += "<script src=\"js/updates.js\"></script>";
-  //response += "<script>function _(e){return document.getElementById(e)}function uploadFile(e,n){var a=_(e).files[0],o=new FormData;o.append(e,a);var t=new XMLHttpRequest;t.upload.addEventListener(\"progress\",progressHandler,!1),t.open(\"POST\",n),t.send(o)}function progressHandler(e){_(\"loaded_n_total\").innerHTML=\"Uploaded \"+e.loaded+\" bytes of \"+e.total;var n=e.loaded/e.total*100;_(\"progressBar\").value=Math.round(n)}</script>";
+  response += staticHTML_head();
+  response += "<title>Speeduino Web Config</title>";
+  //response += "<script src=\"js/updates.js\"></script>";
+  response += staticJS_updates();
   
   response += "<style>";
   //This is a minified version of the data/css/config.css file.

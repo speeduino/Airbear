@@ -28,7 +28,6 @@ void setup()
   initTimers();
   initBLE();
   initWiFi();
-  updateFromRemote(); //Check for pending remote firmware updates
 
   delay(1000);
   Serial.println("Connection Type: " + String(config.getUChar("connection_type")));
@@ -37,74 +36,88 @@ void setup()
   {
     initTCP();
   }
-  if( (config.getUChar("connection_type") == CONNECTION_TYPE_WIFI) )
+
+  if(updatesPending())
   {
-    //Init file system
-    if (!SPIFFS.begin(true)) {
-      Serial.println("An error has occurred while mounting SPIFFS");
-    }
-    initSSE();
-    initSerialData();
-    
-    //Init the web server
-    // Web Server Root URL
+    //When updates are pending, only show the minimum pages
+    server.on("/updateStatus", HTTP_GET, [](AsyncWebServerRequest *request) {
+          request->send(200, "text/json", update_progress_json(request));
+        });
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-      request->send(SPIFFS, "/index.html", "text/html");
-    });
-    
-    server.on("/data", HTTP_GET, [](AsyncWebServerRequest *request) {
-      String jsonOutput;
-      serializeJson(readings_JSON, jsonOutput);
-      //request->send(200, "text/json", JSON.stringify(readings_JSON));
-      request->send(200, "text/json", jsonOutput.c_str());
-    });
-
-    server.serveStatic("/", SPIFFS, "/");
-
+        request->send(200, "text/html", updateInProgressPage());
+      });
   }
   else
   {
-    //If not using the web dash then the root URL will produce the config page
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-      request->send(200, "text/html", webConfigRequest(request));
-    });
-  }
+    if( (config.getUChar("connection_type") == CONNECTION_TYPE_WIFI) && (updatesPending() == false) )
+    {
+      //Init file system
+      if (!SPIFFS.begin(true)) {
+        Serial.println("An error has occurred while mounting SPIFFS");
+      }
+      initSSE();
+      initSerialData();
+      
+      //Init the web server
+      // Web Server Root URL
+      server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(SPIFFS, "/index.html", "text/html");
+      });
+      
+      server.on("/data", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String jsonOutput;
+        serializeJson(readings_JSON, jsonOutput);
+        //request->send(200, "text/json", JSON.stringify(readings_JSON));
+        request->send(200, "text/json", jsonOutput.c_str());
+      });
 
-  server.on(WEB_CONFIG_URL, HTTP_GET, [](AsyncWebServerRequest *request) {
-      request->send(200, "text/html", webConfigRequest(request));
-    });
+      server.serveStatic("/", SPIFFS, "/");
 
-  server.on(WEB_CONFIG_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
-      request->send(200, "text/html", webConfigPOSTRequest(request));
-    });
+    }
+    else
+    {
+      //If not using the web dash then the root URL will produce the config page
+      server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html", webConfigRequest(request));
+      });
+    }
 
-  //Updates the firmware AND data from remote URLs
-  server.on(UPDATE_REMOTE_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
-      request->send(200, "text/html", saveRemoteFW_URLs(request));
-      ESP.restart();
-    });
-  //Scan the wifi networks and return them as JSON
-  server.on("/wifi", HTTP_GET, [](AsyncWebServerRequest *request) {
-      request->send(200, "text/json", scanWifi(request));
-    });
+    server.on(WEB_CONFIG_URL, HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html", webConfigRequest(request));
+      });
 
-  server.on(UPDATE_DATA_UPLOAD_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
+    server.on(WEB_CONFIG_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html", webConfigPOSTRequest(request));
+      });
+
+    //Updates the firmware AND data from remote URLs
+    server.on(UPDATE_REMOTE_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html", saveRemoteFW_URLs(request));
+        delay(1000); //Wait 1 second to allow the page to be sent before restarting
+        ESP.restart();
+      });
+    //Scan the wifi networks and return them as JSON
+    server.on("/wifi", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/json", scanWifi(request));
+      });
+
+    server.on(UPDATE_DATA_UPLOAD_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
+        //This runs when the uplaod is completed
+        partitionUploadComplete(request);
+      },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+        //This runs each time a new chunk is received
+        partitionUploadChunk(request, filename, index, data, len, final, U_SPIFFS);
+      }
+      );
+    server.on(UPDATE_FW_UPLOAD_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
       //This runs when the uplaod is completed
       partitionUploadComplete(request);
-    },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+      },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
       //This runs each time a new chunk is received
-      partitionUploadChunk(request, filename, index, data, len, final, U_SPIFFS);
-    }
-    );
-  server.on(UPDATE_FW_UPLOAD_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
-    //This runs when the uplaod is completed
-    partitionUploadComplete(request);
-    },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
-    //This runs each time a new chunk is received
-    partitionUploadChunk(request, filename, index, data, len, final, U_FLASH);
-    }
-    );
-  
+      partitionUploadChunk(request, filename, index, data, len, final, U_FLASH);
+      }
+      );  
+  }
   
 
   // Start server
@@ -116,6 +129,7 @@ void setup()
 
   server.begin();
   
+  updateFromRemote(); //Check for pending remote firmware updates
 
   //By default the ESP32-C3 will output a bunch of diag messages on bootup over UART. 
   //This messes up the secondary serial on the Speeduino so these bootup messages are disabled.

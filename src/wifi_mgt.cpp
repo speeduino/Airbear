@@ -50,8 +50,6 @@ void initWiFi()
   }
 
   Serial.println(WiFi.localIP());
-
-  
 }
 
 void startAPMode()

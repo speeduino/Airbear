@@ -12,5 +12,8 @@ void partitionUploadChunk(AsyncWebServerRequest *request, String filename, size_
 void partitionUploadComplete(AsyncWebServerRequest *request);
 String saveRemoteFW_URLs(AsyncWebServerRequest *request);
 void updateFromRemote();
+String update_progress_json(AsyncWebServerRequest *request);
+bool updatesPending();
+String updateInProgressPage();
 
 #endif

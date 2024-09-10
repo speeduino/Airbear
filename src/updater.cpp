@@ -6,16 +6,16 @@ This file contains routines for remotely updating the LittleFS partition that co
 #include "timer.h"
 #include "config.h"
 #include "timer.h"
-
-#include <Arduino.h>
+#include "static/static_js.h"
+#include "static/static_html.h"
 
 #include <WiFi.h>
-#include <WiFiMulti.h>
-
-#include <HTTPClient.h>
 #include <HTTPUpdate.h>
-
 #include <Update.h>
+
+uint32_t updateSize = 0;
+uint32_t updateProgress = 0;
+String  updateComment = "";
 
 //Load a data partition from an uploaded file
 void partitionUploadChunk(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final, uint8_t partitionType)
@@ -82,21 +82,55 @@ void partitionUploadComplete(AsyncWebServerRequest *request)
 
 String saveRemoteFW_URLs(AsyncWebServerRequest *request)
 {
-  String resultPage = "Update page";
+
   if (request->hasParam("newFW_url", true)) 
   {
     config.putString("newFW_url", request->getParam("newFW_url", true)->value());
   }
   if (request->hasParam("newData_url", true)) 
   {
-    HTTPClient client;
     config.putString("newData_url", request->getParam("newData_url", true)->value());
   }
-  return resultPage;
+
+  return updateInProgressPage();
+}
+
+String updateInProgressPage()
+{
+  //Create the updates page
+  String updatePage = staticHTML_head();
+  updatePage += staticJS_updates();
+  updatePage += "</head><body onLoad=\"updateProgress()\">";
+  updatePage += "Current Status: <span id=\"updateStatus\"></span><br/>";
+  updatePage += "Current Progress: <span id=\"updateComplete\"></span><br/>";
+  updatePage += "Update Size: <span id=\"updateSize\"></span><br/>";
+  updatePage += "Update Completion: <span id=\"updatePercent\"></span>%<br/>";
+  updatePage += "</body></html>";
+
+  return updatePage;
 }
 
 void update_progress(int cur, int total) {
   Serial.printf("CALLBACK:  HTTP update process at %d of %d bytes...\n", cur, total);
+  updateSize = total;
+  updateProgress = cur;
+}
+
+bool updatesPending()
+{
+  return ( (config.getString("newFW_url", "") != "") || (config.getString("newData_url", "") != "") );
+}
+
+String update_progress_json(AsyncWebServerRequest *request)
+{
+  JsonDocument json;
+  json["updateSize"] = updateSize;
+  json["updateProgress"] = updateProgress;
+  json["updateStatus"] = updateComment;
+
+  String output;
+  serializeJson(json, output);
+  return output;
 }
 
 void updateFromRemote()
@@ -113,6 +147,7 @@ void updateFromRemote()
 
     httpUpdate.onProgress(update_progress);
     config.putString("newFW_url", ""); 
+    updateComment = "Updating Firmware";
     t_httpUpdate_return ret = httpUpdate.update(client, newFW_url);
     
     switch (ret) 
@@ -135,6 +170,7 @@ void updateFromRemote()
     Serial.println(newData_url);
 
     httpUpdate.onProgress(update_progress);
+    updateComment = "Updating Filesystem";
     t_httpUpdate_return ret = httpUpdate.updateSpiffs(client, newData_url);
     config.putString("newData_url", "");
 
