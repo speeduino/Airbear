@@ -77,8 +77,8 @@ evtSource.addEventListener("reading", function(e) {
   //gauges[3].valueText = Math.round(ecuDataFrame['CLT']);
   //gauges[3].value = ecuDataFrame['secl'];
   
-  addLiveDataPoint(readsPerSecond.toFixed(2));
-  document.getElementById('readSpeed').innerHTML = readsPerSecond.toFixed(2);
+  //addLiveDataPoint(readsPerSecond.toFixed(2));
+  //document.getElementById('readSpeed').innerHTML = readsPerSecond.toFixed(2);
 
   
 }, false);

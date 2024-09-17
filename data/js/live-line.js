@@ -72,4 +72,4 @@ function addLiveDataPoint(reading)
   //livechart.update('quiet');
   //console.log("Adding live data point")
 }
-initLiveChart();
+//initLiveChart();

@@ -58,7 +58,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        mode: "HYBRID"
+        mode: "COMMIT"
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
