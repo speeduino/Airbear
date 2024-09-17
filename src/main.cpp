@@ -39,6 +39,7 @@ void setup()
 
   if(updatesPending())
   {
+    Serial.println("Updates pending, starting update");
     //When updates are pending, only show the minimum pages
     server.on("/updateStatus", HTTP_GET, [](AsyncWebServerRequest *request) {
           request->send(200, "text/json", update_progress_json(request));
