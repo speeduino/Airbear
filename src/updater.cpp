@@ -101,7 +101,7 @@ String updateInProgressPage()
   String updatePage = staticHTML_head();
   updatePage += staticJS_updates();
   updatePage += "</head><body onLoad=\"updateProgress()\">";
-  updatePage += "Current Status: <span id=\"updateStatus\"></span><br/>";
+  updatePage += "Current Status: <span id=\"updateStatus\">Preparing to update</span><br/>";
   updatePage += "Current Progress: <span id=\"updateComplete\"></span><br/>";
   updatePage += "Update Size: <span id=\"updateSize\"></span><br/>";
   updatePage += "Update Completion: <span id=\"updatePercent\"></span>%<br/>";
@@ -183,6 +183,8 @@ void updateFromRemote()
       case HTTP_UPDATE_OK: 
         Serial.println("HTTP_UPDATE_OK"); 
         config.putString("newData_url", "");
+        delay(500);
+        ESP.restart();
         break;
     }
   }

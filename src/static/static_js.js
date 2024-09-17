@@ -1,12 +1,13 @@
 //This file is uglified using UglifyJS 3 and the config file within this directory.
 //The output of this is placed into static_js.cpp
 //This can be generaetd with the cmd: uglifyjs --config-file uglifyjs.config.json static_js.js
+// or at : https://skalman.github.io/UglifyJS-online/ (Copy uglifyjs.config.json into the editor)
 
+// **************** staticJS_updates() ****************
 function getElementByID(id)
 {
   return document.getElementById(id)
 }
-
 
 function semverCompare(a, b) 
 {
