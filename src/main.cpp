@@ -50,38 +50,12 @@ void setup()
   }
   else
   {
-    if( (config.getUChar("connection_type") == CONNECTION_TYPE_WIFI) && (updatesPending() == false) )
-    {
-      //Init file system
-      if (!SPIFFS.begin(true)) {
-        Serial.println("An error has occurred while mounting SPIFFS");
-      }
-      initSSE();
-      initSerialData();
-      
-      //Init the web server
-      // Web Server Root URL
-      server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(SPIFFS, "/index.html", "text/html");
+    server.on("/updateStatus", HTTP_GET, [](AsyncWebServerRequest *request) {
+      AsyncWebServerResponse *response = request->beginResponse(302, "text/plain", "No pending updates. Please wait");
+      response->addHeader("Refresh", "3");
+      response->addHeader("Location", "/");
+      request->send(response);
       });
-      
-      server.on("/data", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String jsonOutput;
-        serializeJson(readings_JSON, jsonOutput);
-        //request->send(200, "text/json", JSON.stringify(readings_JSON));
-        request->send(200, "text/json", jsonOutput.c_str());
-      });
-
-      server.serveStatic("/", SPIFFS, "/");
-
-    }
-    else
-    {
-      //If not using the web dash then the root URL will produce the config page
-      server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/html", webConfigRequest(request));
-      });
-    }
 
     server.on(WEB_CONFIG_URL, HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/html", webConfigRequest(request));
@@ -118,6 +92,37 @@ void setup()
       partitionUploadChunk(request, filename, index, data, len, final, U_FLASH);
       }
       );  
+
+    if( (config.getUChar("connection_type") == CONNECTION_TYPE_WIFI) && (updatesPending() == false) )
+    {
+      //Init file system
+      if (!SPIFFS.begin(true)) {
+        Serial.println("An error has occurred while mounting SPIFFS");
+      }
+      initSSE();
+      initSerialData();
+      
+      //Init the web server
+      server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(SPIFFS, "/index.html", "text/html");
+      });
+      
+      server.on("/data", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String jsonOutput;
+        serializeJson(readings_JSON, jsonOutput);
+        request->send(200, "text/json", jsonOutput.c_str());
+      });
+
+      server.serveStatic("/", SPIFFS, "/");
+
+    }
+    else
+    {
+      //If not using the web dash then the root URL will produce the config page
+      server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html", webConfigRequest(request));
+      });
+    }
   }
   
 

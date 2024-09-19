@@ -147,7 +147,7 @@ void updateFromRemote()
 
     httpUpdate.onProgress(update_progress);
     config.putString("newFW_url", ""); 
-    updateComment = "Updating Firmware";
+    updateComment = "Updating Firmware (Step 1 of 2)";
     t_httpUpdate_return ret = httpUpdate.update(client, newFW_url);
     
     switch (ret) 
@@ -170,7 +170,7 @@ void updateFromRemote()
     Serial.println(newData_url);
 
     httpUpdate.onProgress(update_progress);
-    updateComment = "Updating Filesystem";
+    updateComment = "Updating Filesystem (Step 2 of 2)";
     t_httpUpdate_return ret = httpUpdate.updateSpiffs(client, newData_url);
     config.putString("newData_url", "");
 
