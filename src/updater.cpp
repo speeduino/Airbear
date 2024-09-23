@@ -8,6 +8,7 @@ This file contains routines for remotely updating the LittleFS partition that co
 #include "timer.h"
 #include "static/static_js.h"
 #include "static/static_html.h"
+#include "static/static_css.h"
 
 #include <WiFi.h>
 #include <HTTPUpdate.h>
@@ -100,12 +101,21 @@ String updateInProgressPage()
   //Create the updates page
   String updatePage = staticHTML_head();
   updatePage += staticJS_updates();
+  updatePage += staticCSS_config();
   updatePage += "</head><body onLoad=\"updateProgress()\">";
+  updatePage += "<div class=\"container\">";
+  updatePage += staticHTML_logo();
+  updatePage += "<input id=\"tab-1\" type=\"radio\" name=\"tabs\" class=\"tabs\" checked>";
+  updatePage += "<label for=\"tab-1\">Update Progress</label>";
+  updatePage += "<div class=\"content\">";
+
+  updatePage += "<div id=\"content-1\">";
   updatePage += "Current Status: <span id=\"updateStatus\">Preparing to update</span><br/>";
   updatePage += "Current Progress: <span id=\"updateComplete\"></span><br/>";
   updatePage += "Update Size: <span id=\"updateSize\"></span><br/>";
-  updatePage += "Update Completion: <span id=\"updatePercent\"></span>%<br/>";
-  updatePage += "</body></html>";
+  updatePage += "Update Completion: <span id=\"updatePercent\"></span>%<div/>";
+
+  updatePage += "</div></div></body></html>";
 
   return updatePage;
 }

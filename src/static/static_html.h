@@ -4,5 +4,6 @@
 #include "../globals.h"
 
 String staticHTML_head();
+String staticHTML_logo();
 
 #endif
