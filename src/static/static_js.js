@@ -96,8 +96,15 @@ function updateProgress()
       const percentComplete = Math.floor((jsonData.updateProgress / jsonData.updateSize) * 100)
       setInnerHTML(getElementByID('updatePercent'), percentComplete)
       console.log(percentComplete)
-      if(percentComplete >= 98) { window.location.href = '/' } 
+      if(percentComplete >= 98) 
+      { 
+        setTimeout(() => {
+          const wl = window.location
+          wl.href = '/'
+          wl=wl.href //Force a refresh of page without resending POST data
+        }, 7000)
+      } 
       else { updateProgress() }
     }
-  }, 1500);
+  }, 1100);
 }

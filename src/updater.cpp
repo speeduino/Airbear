@@ -110,12 +110,12 @@ String updateInProgressPage()
   updatePage += "<div class=\"content\">";
 
   updatePage += "<div id=\"content-1\">";
-  updatePage += "Current Status: <span id=\"updateStatus\">Preparing to update</span><br/>";
-  updatePage += "Current Progress: <span id=\"updateComplete\"></span><br/>";
-  updatePage += "Update Size: <span id=\"updateSize\"></span><br/>";
-  updatePage += "Update Completion: <span id=\"updatePercent\"></span>%<div/>";
+  updatePage += "<strong>Current Status: </strong><span id=\"updateStatus\">Preparing to update</span><br/>";
+  updatePage += "<strong>Update Size: </strong><span id=\"updateSize\"></span><br/>";
+  updatePage += "<strong>Downloaded: </strong><span id=\"updateComplete\"></span><br/>";
+  updatePage += "<strong>Update Completion: </strong><span id=\"updatePercent\"></span>%<div/>";
 
-  updatePage += "</div></div></body></html>";
+  updatePage += "<br/></div></div></body></html>";
 
   return updatePage;
 }
@@ -193,7 +193,7 @@ void updateFromRemote()
       case HTTP_UPDATE_OK: 
         Serial.println("HTTP_UPDATE_OK"); 
         config.putString("newData_url", "");
-        delay(500);
+        delay(1300); //Need to wait at least 1 update cycle (1100ms) so that the frontend knows the update is complete
         ESP.restart();
         break;
     }

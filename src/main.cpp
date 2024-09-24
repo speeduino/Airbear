@@ -29,7 +29,7 @@ void setup()
   initBLE();
   initWiFi();
 
-  delay(1000);
+  delay(500);
   Serial.println("Connection Type: " + String(config.getUChar("connection_type")));
 
   if( (config.getUChar("connection_type") == CONNECTION_TYPE_TUNERSTUDIO) )
@@ -67,9 +67,10 @@ void setup()
 
     //Updates the firmware AND data from remote URLs
     server.on(UPDATE_REMOTE_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
+        request->onDisconnect([](){
+          ESP.restart();
+        });
         request->send(200, "text/html", saveRemoteFW_URLs(request));
-        delay(1000); //Wait 1 second to allow the page to be sent before restarting
-        ESP.restart();
       });
     //Scan the wifi networks and return them as JSON
     server.on("/wifi", HTTP_GET, [](AsyncWebServerRequest *request) {
