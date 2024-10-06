@@ -35,7 +35,7 @@ String webConfigRequest(AsyncWebServerRequest *request)
   response += "<form action=\"" + String(WEB_CONFIG_URL) + "\" method=\"post\">";
   response += "<h2>Connection Type</h2>";
   response += "<select name=\"connection_type\" />";
-  response += "<option value=\"1\" " + (config.getUChar("connection_type") == CONNECTION_TYPE_WIFI ? String("selected") : String("")) + ">Web Dash</option>";
+  response += "<option value=\"1\" " + (config.getUChar("connection_type") == CONNECTION_TYPE_DASH ? String("selected") : String("")) + ">Web Dash</option>";
   response += "<option value=\"2\" " + (config.getUChar("connection_type") == CONNECTION_TYPE_BLE  ? String("selected") : String("")) + ">Bluetooth</option>";
   response += "<option value=\"3\" " + (config.getUChar("connection_type") == CONNECTION_TYPE_TUNERSTUDIO ? String("selected") : String("")) + ">TunerStudio (TCP)</option>";
   response += "</select><br/>";

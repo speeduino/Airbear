@@ -25,7 +25,7 @@
 #define BIT_TIMER_1KHZ            7U
 
 #define CONNECTION_TYPE_NONE        0
-#define CONNECTION_TYPE_WIFI        1
+#define CONNECTION_TYPE_DASH        1
 #define CONNECTION_TYPE_BLE         2
 #define CONNECTION_TYPE_TUNERSTUDIO 3
 

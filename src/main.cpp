@@ -94,7 +94,7 @@ void setup()
       }
       );  
 
-    if( (config.getUChar("connection_type") == CONNECTION_TYPE_WIFI) && (updatesPending() == false) )
+    if( (config.getUChar("connection_type") == CONNECTION_TYPE_DASH) && (updatesPending() == false) )
     {
       //Init file system
       if (!SPIFFS.begin(true)) {
@@ -147,7 +147,10 @@ void setup()
     esp_efuse_set_rom_log_scheme(ESP_EFUSE_ROM_LOG_ALWAYS_OFF); //New eFuse value will be 3
   }
 
+  if(config.getUChar("connection_type") == CONNECTION_TYPE_TUNERSTUDIO) { Serial_ECU.setRxBufferSize(2048+3); } //Maximum buffer size is 4x SD sectors (512) + 3 bytes over overhead
+  else { Serial_ECU.setRxBufferSize(257); } //Maximum buffer sent by the ECU
   Serial_ECU.begin(115200);
+  
   delay(500);
   while(Serial_ECU.available()) { Serial_ECU.read(); } //In case unit has restarted and ECU is still sending data over UART
 }
@@ -163,7 +166,7 @@ void loop()
   {
     BIT_CLEAR(TIMER_mask, BIT_TIMER_30HZ);
 
-    if(config.getUChar("connection_type") == CONNECTION_TYPE_WIFI)
+    if(config.getUChar("connection_type") == CONNECTION_TYPE_DASH)
     {
       if(Serial_ECU.available())
       {
@@ -197,23 +200,18 @@ void loop()
     
     if(Serial_ECU)
     {
-      if(config.getUChar("connection_type") == CONNECTION_TYPE_WIFI)
+      if(config.getUChar("connection_type") == CONNECTION_TYPE_DASH)
       {
         sendPing();
         Serial.print("Notifications Sent: ");
         Serial.println(notificationsSent);
 
-        if(serialECURequestQueueSize > 3)
+        if(serialECURequestQueueSize >= 2) { serialECURequestQueueSize++;} //Wait 1 additional second to allow ECU to timeout false data
+        if(serialECURequestQueueSize == 10)
         {
           //Not getting responses from ECU
           sendNoDataMessage(); //Alert clients that no data is available
-          /*          Serial_ECU.flush();
-          Serial_ECU.end();
-          Serial.println("Serial connection lost. Reconnecting");
-          Serial_ECU.begin(115200);
           serialECURequestQueueSize = 0;
-          */
-
         }
       }
       else if(config.getUChar("connection_type") == CONNECTION_TYPE_TUNERSTUDIO)
