@@ -73,8 +73,8 @@ String webConfigRequest(AsyncWebServerRequest *request)
   response += "<input type=\"hidden\" id=\"newFW_url\" name=\"newFW_url\" />";
   response += "<input type=\"hidden\" id=\"newData_url\" name=\"newData_url\"/>";
   response += "<input type=\"checkbox\" id=\"updateData\" onClick=\"toggleData()\" checked />Update Dashboard Data<br/>";
-  response += "<input type=\"submit\" value=\"Update\" id=\"update_btn\" disabled/>";
-  response += "</form>";
+  response += "<input type=\"submit\" value=\"Update\" id=\"update_btn\" disabled/><br/>";
+  response += "</form><hr/>";
   response += "<h2>Manual Update</h2>";
   response += "<h3>Upload Filesystem</h3>";
   response += "<form action=\"" + String(UPDATE_DATA_UPLOAD_URL) + "\" method=\"post\" enctype=\"multipart/form-data\">";
@@ -84,7 +84,7 @@ String webConfigRequest(AsyncWebServerRequest *request)
   //response += "<progress id=\"progressBar\" value=\"0\" max=\"100\" style=\"width:300px;\"></progress>";
   //response += "<p id=\"loaded_n_total\"></p>";
   response += "</form>";
-  response += "<br/><br/>";
+  //response += "<br/>";
   response += "<h3>Upload Firmware</h3>";
   response += "<form action=\"" + String(UPDATE_FW_UPLOAD_URL) + "\" method=\"post\" enctype=\"multipart/form-data\">";
   response += "File: <input type=\"file\" name=\"update\"/><br/>";
@@ -100,35 +100,53 @@ String webConfigRequest(AsyncWebServerRequest *request)
 String webConfigPOSTRequest(AsyncWebServerRequest *request)
 {
   bool wifiChanged = false;
+  String updateMessage = "";
   //Respond to any parameters that were sent through
   if (request->hasParam("ssid", true)) 
   {
-    Serial.println("Changing Wifi network. New ssid: " + request->getParam("ssid", true)->value());
+    updateMessage = "Changing Wifi network. New ssid: " + request->getParam("ssid", true)->value();
     config.putString("ssid", request->getParam("ssid", true)->value());
   }
   if (request->hasParam("wpa-psk", true)) 
   {
-    Serial.println("New wifi password received");
+    updateMessage = "New wifi password received";
     config.putString("wpa-psk", request->getParam("wpa-psk", true)->value());
   }
   if (request->hasParam("ap-ssid", true))
   {
-    Serial.println("Changing AP SSID. New ssid: " + request->getParam("ap-ssid", true)->value());
+    updateMessage = "Changing AP SSID. New ssid: " + request->getParam("ap-ssid", true)->value();
     config.putString("ap-ssid", request->getParam("ap-ssid", true)->value());
   }
   if (request->hasParam("connection_type", true))
   {
-    Serial.println("Changing Connection Type: " + request->getParam("connection_type", true)->value());
+    updateMessage = "Changing Connection Type: " + request->getParam("connection_type", true)->value();
     char c = request->getParam("connection_type", true)->value()[0];
     config.putUChar("connection_type", atoi(&c) );
   }
+  Serial.println(updateMessage);
 
-  if(wifiChanged)
-  {
-    //Delayed reboot? Need to return the POST request and then reboot or restart network
-  }
+  //Create the updates page
+  String updatePage = staticHTML_head();
+  updatePage += staticCSS_config();
+  updatePage += "<meta http-equiv=\"refresh\" content=\"7\"; url=\"/\" />";
+  updatePage += "</head><body>";
+  updatePage += "<div class=\"container\">";
+  updatePage += staticHTML_logo();
+  updatePage += "<input id=\"tab-1\" type=\"radio\" name=\"tabs\" class=\"tabs\" checked>";
+  updatePage += "<label for=\"tab-1\">Config</label>";
+  updatePage += "<div class=\"content\">";
 
-  return String("Config Saved");
+  updatePage += "<div id=\"content-1\">";
+  updatePage += "<center>";
+  updatePage += "<h2>Config Saved</h2><br/>";
+  updatePage += "Please wait 10 seconds for system to restart";
+  updatePage += "</center></br></br></br></br>";
+  updatePage += "<strong>Message: </strong>";
+  updatePage += updateMessage;
+  
+  updatePage += "<br/></div></div></body></html>";
+
+  return updatePage;
 }
 
 String scanWifi(AsyncWebServerRequest *request)

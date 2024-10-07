@@ -62,6 +62,9 @@ void setup()
       });
 
     server.on(WEB_CONFIG_URL, HTTP_POST, [](AsyncWebServerRequest *request) {
+        request->onDisconnect([](){
+            ESP.restart();
+          });
         request->send(200, "text/html", webConfigPOSTRequest(request));
       });
 
@@ -150,7 +153,7 @@ void setup()
   if(config.getUChar("connection_type") == CONNECTION_TYPE_TUNERSTUDIO) { Serial_ECU.setRxBufferSize(2048+3); } //Maximum buffer size is 4x SD sectors (512) + 3 bytes over overhead
   else { Serial_ECU.setRxBufferSize(257); } //Maximum buffer sent by the ECU
   Serial_ECU.begin(115200);
-  
+
   delay(500);
   while(Serial_ECU.available()) { Serial_ECU.read(); } //In case unit has restarted and ECU is still sending data over UART
 }

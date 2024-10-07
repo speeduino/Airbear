@@ -128,6 +128,7 @@ void initSerialData()
     readings_JSON["correction_voltage"] = 0;
     readings_JSON["Battery_Voltage"] = 0;
     readings_JSON["AFR1"] = 0;
+    readings_JSON["PW1"] = 0;
     readings_JSON["correction_o2"] = 0;
     readings_JSON["correction_iat"] = 0;
     readings_JSON["correction_clt"] =0;
