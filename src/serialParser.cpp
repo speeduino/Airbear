@@ -6,6 +6,8 @@
 uint16_t tempRPM = 0;
 uint8_t serialECURequestQueueSize = 0;
 
+//#define DEBUG_SERIAL_PARSER
+
 void requestSerialData() 
 {
   #ifdef DEBUG_SERIAL_PARSER
@@ -122,6 +124,7 @@ void initSerialData()
     readings_JSON["MAP"] = 0;
     readings_JSON["IAT"] = 0;
     readings_JSON["CLT"] = 0;
+    readings_JSON["TPS"] = 0;
     readings_JSON["correction_voltage"] = 0;
     readings_JSON["Battery_Voltage"] = 0;
     readings_JSON["AFR1"] = 0;

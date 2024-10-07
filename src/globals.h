@@ -3,13 +3,12 @@
 
 //#include <Arduino.h>
 #include <ESPAsyncWebServer.h>
-//#include <Arduino_JSON.h>
 #include <ArduinoJson.h>
 
 #define PRODUCT_NAME             "AirBear"
 #define FIRMWARE_VERSION         "0.0.9"
 
-#define FAKE_RPM
+//#define FAKE_RPM
 
 #define BIT_SET(a,b) ((a) |= (1U<<(b)))
 #define BIT_CLEAR(a,b) ((a) &= ~(1U<<(b)))
