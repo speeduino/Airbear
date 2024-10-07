@@ -84,7 +84,6 @@ String webConfigRequest(AsyncWebServerRequest *request)
   //response += "<progress id=\"progressBar\" value=\"0\" max=\"100\" style=\"width:300px;\"></progress>";
   //response += "<p id=\"loaded_n_total\"></p>";
   response += "</form>";
-  //response += "<br/>";
   response += "<h3>Upload Firmware</h3>";
   response += "<form action=\"" + String(UPDATE_FW_UPLOAD_URL) + "\" method=\"post\" enctype=\"multipart/form-data\">";
   response += "File: <input type=\"file\" name=\"update\"/><br/>";
