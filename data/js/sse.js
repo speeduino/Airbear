@@ -3,7 +3,133 @@
 const evtSource = new EventSource("/events");
 var lastReadingTime = 0;
 var readsPerSecond = 0;
+// Connection state variables
+let isConnected = false;
+let isSimulating = false;
+let simulationInterval;
+let lastValues = {
+  rpm: 1000,
+  TPS: 0,
+  CLT: 80,
+  IAT: 25,
+  PW1: 2.5,
+  MAP: 100,
+  AFR1: 14.7
+};
 
+// Update connection UI
+function updateConnectionUI() {
+  const indicator = document.getElementById('connection-indicator');
+  const text = document.getElementById('connection-text');
+  const toggle = document.getElementById('simulation-toggle');
+  
+  if (isConnected) {
+    indicator.className = 'connected';
+    text.textContent = 'Connected';
+    toggle.style.display = 'none';
+  } else {
+    indicator.className = 'disconnected';
+    text.textContent = 'Disconnected';
+    toggle.style.display = 'block';
+  }
+}
+
+// Generate simulated data
+function generateSimulatedData() {
+  // More realistic simulation with different behaviors for each gauge
+  const now = Date.now();
+  
+  // RPM - simulates engine revving up and down
+  lastValues.rpm = Math.max(800, Math.min(8000, 
+    lastValues.rpm + (Math.random() * 200 - 100) + 
+    (300 * Math.sin(now/5000))));
+  
+  // TPS - simulates throttle input
+  lastValues.TPS = Math.max(0, Math.min(100, 
+    lastValues.TPS + (Math.random() * 5 - 2.5) + 
+    (20 * Math.sin(now/7000))));
+  
+  // CLT - slowly oscillating coolant temp
+  lastValues.CLT = 80 + (15 * Math.sin(now/60000));
+  
+  // IAT - faster changing intake temp
+  lastValues.IAT = 25 + (10 * Math.sin(now/30000));
+  
+  // PW1 - correlates with RPM and TPS
+  lastValues.PW1 = Math.max(1, Math.min(20, 
+    1 + (lastValues.rpm/1000) * 0.5 + (lastValues.TPS/100) * 3));
+  
+  // MAP - correlates with RPM and TPS
+  lastValues.MAP = Math.max(30, Math.min(250, 
+    30 + (lastValues.rpm/50) + (lastValues.TPS * 1.5)));
+  
+  // AFR - oscillates around stoichiometric
+  lastValues.AFR1 = 14.7 + (0.5 * Math.sin(now/4000));
+  
+  // Mark as simulated data
+  return {...lastValues, __isSimulated: true};
+}
+
+// Start/stop simulation
+function toggleSimulation(enable) {
+  const checkbox = document.getElementById('enable-simulation');
+  
+  if (enable) {
+    isSimulating = true;
+    checkbox.checked = true;
+    
+    // Start with current values or defaults
+    if (!lastValues) {
+      lastValues = {
+        rpm: 1000,
+        TPS: 0,
+        CLT: 80,
+        IAT: 25,
+        PW1: 2.5,
+        MAP: 100,
+        AFR1: 14.7
+      };
+    }
+    
+    // First immediate update
+    const simulatedData = generateSimulatedData();
+    window.updateGaugesWithConfiguration(simulatedData);
+    
+    // Regular updates
+    simulationInterval = setInterval(() => {
+      const simulatedData = generateSimulatedData();
+      window.updateGaugesWithConfiguration(simulatedData);
+    }, 33); // ~30Hz
+    
+    console.log("Simulation started");
+  } else {
+    isSimulating = false;
+    checkbox.checked = false;
+    clearInterval(simulationInterval);
+    console.log("Simulation stopped");
+  }
+}
+
+// Initialize connection monitoring
+function initConnectionMonitor() {
+  updateConnectionUI();
+  
+  // Setup simulation toggle
+  const checkbox = document.getElementById('enable-simulation');
+  if (checkbox) {
+    checkbox.addEventListener('change', (e) => {
+      toggleSimulation(e.target.checked);
+    });
+  }
+  
+  // Check if we should start in simulation mode (for testing)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('simulate')) {
+    toggleSimulation(true);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initConnectionMonitor);
 window.addEventListener('load', onload);
 window.addEventListener('beforeunload', () => {
 	evtSource.close();
@@ -15,8 +141,24 @@ function onload(event) {
 }
 
 evtSource.addEventListener('open', function(e) {
-  console.log("Events Connected");
+  isConnected = true;
+  updateConnectionUI();
+  if (isSimulating) toggleSimulation(false);
  }, false);
+
+ evtSource.addEventListener('error', function(e) {
+  isConnected = false;
+  updateConnectionUI();
+  
+  // If we were connected before, try to reconnect
+  if (e.target.readyState === EventSource.CLOSED) {
+    setTimeout(() => {
+      if (!isConnected && !isSimulating) {
+        location.reload();
+      }
+    }, 5000);
+  }
+}, false);
 
 evtSource.addEventListener("ping", function(e) {
   console.log("Ping received: " + e.data);
@@ -27,8 +169,15 @@ evtSource.addEventListener("ping", function(e) {
  }, false);
 
 // Function that receives the message from the ESP32 with the readings
-
 evtSource.addEventListener("reading", function(e) {
+
+  isConnected = true;
+  updateConnectionUI();
+  
+  if (isSimulating) {
+    toggleSimulation(false);
+    document.getElementById('enable-simulation').checked = false;
+  }
   
   //console.log("ECU frame received");
   var arrivedTime = Date.now();
@@ -49,6 +198,12 @@ evtSource.addEventListener("reading", function(e) {
   }
 
   var ecuDataFrame = JSON.parse(e.data);
+  if (window.updateGaugesWithConfiguration) {
+    window.updateGaugesWithConfiguration(ecuDataFrame);
+  }
+  // Store last values in case we need to simulate
+  lastValues = {...ecuDataFrame};
+  return;
 
   gauges[0].value = ecuDataFrame['rpm'];
   gauges[0].valueText = Math.round(ecuDataFrame['rpm']);

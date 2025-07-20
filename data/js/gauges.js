@@ -1,4 +1,3 @@
-
 var gaugeConfig_rpm = {
     type: "radial-gauge",
     width: 400,
@@ -239,6 +238,78 @@ if (document.fullscreenEnabled) {
     `;
     document.body.appendChild(fullscreen_button);
 }
+
+//The default gauge configurations
+const gaugeConfigurations = {
+    gauges: [
+      {
+        id: 'gauge1',
+        type: 'radial',
+        title: 'RPM',
+        field: 'rpm',
+        min: 0,
+        max: 9000,
+        units: 'RPM'
+      },
+      {
+        id: 'gauge2',
+        type: 'linear',
+        title: 'TPS',
+        field: 'TPS',
+        min: 0,
+        max: 100,
+        units: '%'
+      },
+      {
+        id: 'gauge3',
+        type: 'linear',
+        title: 'CLT',
+        field: 'CLT',
+        min: 0,
+        max: 160,
+        units: 'C'
+      },
+      {
+        id: 'gauge4',
+        type: 'linear',
+        title: 'IAT',
+        field: 'IAT',
+        min: 0,
+        max: 100,
+        units: 'C'
+      },
+      {
+        id: 'gauge5',
+        type: 'linear',
+        title: 'TPS',
+        field: 'TPS',
+        min: 0,
+        max: 100,
+        units: '%'
+      },
+      {
+        id: 'gauge6',
+        type: 'linear',
+        title: 'TPS',
+        field: 'TPS',
+        min: 0,
+        max: 100,
+        units: '%'
+      },
+      {
+        id: 'gauge7',
+        type: 'linear',
+        title: 'TPS',
+        field: 'TPS',
+        min: 0,
+        max: 100,
+        units: '%'
+      },
+      // ... other gauges
+    ],
+    theme: 'dark',
+    layout: 'default'
+  };
 
 const gauges = [];
 
