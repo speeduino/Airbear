@@ -2,7 +2,7 @@
 #include "updater.h"
 #include "config.h"
 #include "logger.h"
-
+#include "WiFi.h"
 #include "static/static_html.h"
 #include "static/static_js.h"
 #include "static/static_css.h"
