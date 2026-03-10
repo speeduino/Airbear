@@ -12,13 +12,9 @@ void initSSE()
 
 void notifyClients() 
 {
-  //if (WiFi.status() != WL_CONNECTED && WiFi.softAPgetStationNum() < 1) 
-  if(false)
+  if(events.count() > 0 ) 
   {
     //See: https://github.com/me-no-dev/ESPAsyncWebServer/issues/1158#issuecomment-1557017468
-  }
-  else
-  {
     String jsonOutput;
     serializeJson(readings_JSON, jsonOutput);
     //events.send(JSON.stringify(readings_JSON).c_str(), "reading", millis(), 0);
