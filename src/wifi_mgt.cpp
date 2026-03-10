@@ -26,6 +26,7 @@ void initWiFi()
   else
   {
     WiFi.begin(ssid, password);
+    WiFi.setTxPower(WIFI_POWER_8_5dBm);
     Serial.print("Connecting to WiFi ..");
 
     uint8_t timeoutCounter = 0;
