@@ -63,7 +63,7 @@ evtSource.addEventListener("reading", function(e) {
   gauges[3].value = ecuDataFrame['IAT'];
   document.getElementById("gauge4-value").innerText = Math.round(ecuDataFrame['IAT']);
 
-  gauges[4].value = ecuDataFrame['PW'];
+  gauges[4].value = ecuDataFrame['PW1'];
   document.getElementById("gauge5-value").innerText = Math.round(ecuDataFrame['PW1']);
 
   gauges[5].value = ecuDataFrame['MAP'];

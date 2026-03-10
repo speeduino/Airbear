@@ -4,7 +4,7 @@
 #include <ArduinoJson.h>
 
 uint16_t tempRPM = 0;
-uint8_t serialECURequestQueueSize = 0;
+uint16_t serialECURequestQueueSize = 0;
 
 //#define DEBUG_SERIAL_PARSER
 

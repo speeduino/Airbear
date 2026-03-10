@@ -4,13 +4,13 @@
 
 void debugMsg(String msg, uint8_t pri)
 {
-  if(pri >= config.getUChar("debugLevel"))
+  if(pri >= config.getUChar("debug_level"))
   {
-    if(config.getBool("debugSerial"))
+    if(config.getBool("debug_serial"))
     {
       Serial.println(msg);
     }
-    if(config.getBool("debugWeb"))
+    if(config.getBool("debug_web"))
     {
       sendSSEDebugMessage(msg);
       Serial.println(msg);

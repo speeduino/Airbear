@@ -209,7 +209,7 @@ void loop()
         Serial.println(notificationsSent);
 
         if(serialECURequestQueueSize >= 2) { serialECURequestQueueSize++;} //Wait 1 additional second to allow ECU to timeout false data
-        if(serialECURequestQueueSize == 10)
+        if(serialECURequestQueueSize >= 10)
         {
           //Not getting responses from ECU
           sendNoDataMessage(); //Alert clients that no data is available
