@@ -124,6 +124,18 @@ void handleData(void *arg, AsyncClient *client, void *data, size_t len)
 
 }
 
+void handleDisconnect(void *arg, AsyncClient *client)
+{
+  debugMsg(String("Client disconnected from TCP socket, ip: ") + client->remoteIP().toString().c_str(), LOG_LEVEL_INFO);
+  if(numTCPClients > 0) { numTCPClients--; }
+}
+
+void handleError(void *arg, AsyncClient *client, int8_t error)
+{
+  debugMsg(String("TCP client error from ip: ") + client->remoteIP().toString().c_str(), LOG_LEVEL_INFO);
+  if(numTCPClients > 0) { numTCPClients--; }
+}
+
 void handleNewClient(void *arg, AsyncClient *client)
 {
 	Serial.printf("New client has been connected to TCP socket, ip: %s \n", client->remoteIP().toString().c_str());
@@ -131,8 +143,8 @@ void handleNewClient(void *arg, AsyncClient *client)
   numTCPClients++;
 	client->onData(&handleData, NULL);
   //TS_TCP_Client->onData(&handleData, NULL);
-	//client->onError(&handleError, NULL);
-	//client->onDisconnect(&handleDisconnect, NULL);
+	client->onError(&handleError, NULL);
+	client->onDisconnect(&handleDisconnect, NULL);
 	//client->onTimeout(&handleTimeOut, NULL);
 }
 
