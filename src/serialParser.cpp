@@ -67,7 +67,7 @@ void parseFixedSerialData()
     readings_JSON["correction_total"] = Serial_ECU.read();
     readings_JSON["VE"] = Serial_ECU.read();
     readings_JSON["afr_target"] = Serial_ECU.read() / 10.0;
-    readings_JSON["PW1"] = (Serial_ECU.read() | (Serial_ECU.read() << 8)) / 10;0;
+    readings_JSON["PW1"] = (Serial_ECU.read() | (Serial_ECU.read() << 8)) / 10.0;
     readings_JSON["tps_DOT"] = Serial_ECU.read() * 10;
     readings_JSON["advance"] = Serial_ECU.read();
     readings_JSON["TPS"] = Serial_ECU.read();
