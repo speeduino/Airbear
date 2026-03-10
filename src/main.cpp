@@ -178,22 +178,21 @@ void loop()
       if(serialECURequestQueueSize < 2) { requestSerialData(); }
       notifyClients();
     }
-  }
-
-  if(config.getUChar("connection_type") == CONNECTION_TYPE_BLE)
-  {
-    if(Serial_ECU.available())
+    else if(config.getUChar("connection_type") == CONNECTION_TYPE_BLE)
     {
-      Serial.print("Received message back from ECU: ");
-
-      std::string tempMsg;
-      uint16_t len = Serial_ECU.available();
-      for(uint16_t i = 0; i < len; i++)
+      if(Serial_ECU.available())
       {
-        tempMsg.append(1, (char)Serial_ECU.read());
+        Serial.print("Received message back from ECU: ");
+
+        std::string tempMsg;
+        uint16_t len = Serial_ECU.available();
+        for(uint16_t i = 0; i < len; i++)
+        {
+          tempMsg.append(1, (char)Serial_ECU.read());
+        }
+        Serial.println(tempMsg.c_str());
+        SendMessageBLE(tempMsg);
       }
-      Serial.println(tempMsg.c_str());
-      SendMessageBLE(tempMsg);
     }
   }
 
