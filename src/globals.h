@@ -6,7 +6,7 @@
 #include <ArduinoJson.h>
 
 #define PRODUCT_NAME             "AirBear"
-#define FIRMWARE_VERSION         "0.1.0"
+#define FIRMWARE_VERSION         "0.1.2"
 
 //#define FAKE_RPM
 
